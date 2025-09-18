@@ -1,0 +1,66 @@
+name: intelligent_lukas
+services:
+  port-monitor:
+    cpu_shares: 90
+    command: []
+    container_name: port-monitor
+    user: root
+    deploy:
+      resources:
+        limits:
+          memory: 67181621248
+    environment:
+      - AUTO_REFRESH_INTERVAL=5
+      - DATA_RETENTION_DAYS=30
+      - ENABLE_NOTIFICATIONS=true
+      - NODE_ENV=production
+      - PORT=3001
+      - LOG_LEVEL=INFO
+      - DOCKER_SOCKET=/var/run/docker.sock
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:3001/health
+      timeout: 10s
+      interval: 30s
+      retries: 3
+    image: chicohaager/zimaos-port-monitor:latest
+    pid: host
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /proc
+        target: /host/proc
+        read_only: true
+      - type: bind
+        source: /sys
+        target: /host/sys
+        read_only: true
+      - type: bind
+        source: /DATA/AppData/port-monitor
+        target: /app/data
+    ports: []
+    devices: []
+    cap_add: []
+    network_mode: host
+x-casaos:
+  author: self
+  category: self
+  hostname: ""
+  icon: ""
+  index: /
+  is_uncontrolled: false
+  port_map: ""
+  scheme: http
+  store_app_id: intelligent_lukas
+  title:
+    custom: ""
+    en_us: port-monitor
