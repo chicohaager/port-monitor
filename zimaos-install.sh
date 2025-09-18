@@ -8,7 +8,7 @@ echo "🚀 Installing ZimaOS Port Monitor..."
 # Set variables
 IMAGE_NAME="chicohaager/zimaos-port-monitor:latest"
 CONTAINER_NAME="zimaos-port-monitor"
-DATA_DIR="/DATA/AppData/port-monitor/data"
+DATA_DIR="/DATA/AppData/port-monitor"
 HOST_PORT="3000"
 
 # Create data directory

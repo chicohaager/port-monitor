@@ -51,7 +51,7 @@
 
 4. **Data Persistence**
    - **Container Path**: `/app/data`
-   - **Host Path**: `/DATA/AppData/port-monitor/data`
+   - **Host Path**: `/DATA/AppData/port-monitor`
    - **Access**: `Read-write`
 
 #### Device Access
@@ -110,7 +110,7 @@ LOG_LEVEL = INFO
 /var/run/docker.sock -> /var/run/docker.sock (ro)
 /proc -> /host/proc (ro)
 /sys -> /host/sys (ro)
-/DATA/AppData/port-monitor/data -> /app/data (rw)
+/DATA/AppData/port-monitor -> /app/data (rw)
 ```
 
 **Advanced Settings:**
@@ -142,7 +142,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /DATA/AppData/port-monitor/data:/app/data
+      - /DATA/AppData/port-monitor:/app/data
     ports:
       - "3000:3000"
     labels:
@@ -159,7 +159,7 @@ services:
 docker pull chicohaager/zimaos-port-monitor:latest
 
 # Create data directory
-mkdir -p /DATA/AppData/port-monitor/data
+mkdir -p /DATA/AppData/port-monitor
 
 # Run the container
 docker run -d \
@@ -173,7 +173,7 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /proc:/host/proc:ro \
   -v /sys:/host/sys:ro \
-  -v /DATA/AppData/port-monitor/data:/app/data \
+  -v /DATA/AppData/port-monitor:/app/data \
   -p 3000:3000 \
   chicohaager/zimaos-port-monitor:latest
 ```
@@ -228,7 +228,7 @@ docker logs -f zimaos-port-monitor
 
 - **Default Credentials**: Change immediately after installation
 - **Network Access**: The app requires privileged access for complete monitoring
-- **Data Storage**: All configuration and logs are stored in `/DATA/AppData/port-monitor/data`
+- **Data Storage**: All configuration and logs are stored in `/DATA/AppData/port-monitor`
 - **Updates**: Pull latest image and restart container for updates
 
 ## Features Available

@@ -46,7 +46,7 @@
     },
     {
       "container_path": "/app/data",
-      "host_path": "/DATA/AppData/port-monitor/data",
+      "host_path": "/DATA/AppData/port-monitor",
       "access": "rw"
     }
   ],

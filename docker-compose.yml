@@ -15,7 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - ./data:/app/data
+      - /DATA/AppData/port-monitor:/app/data
     ports:
       - "3000:3000"
     labels:
