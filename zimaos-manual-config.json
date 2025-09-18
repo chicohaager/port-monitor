@@ -1,0 +1,82 @@
+{
+  "name": "Port Monitor",
+  "title": "Port Monitor - Advanced Network Security",
+  "description": "Real-time port monitoring and security analysis for ZimaOS with Docker integration",
+  "image": "chicohaager/zimaos-port-monitor:latest",
+  "tag": "latest",
+  "icon_url": "",
+  "web_ui": "http://$HOST_IP:3000",
+  "network": "bridge",
+  "ports": [
+    {
+      "container_port": 3000,
+      "host_port": 3000,
+      "protocol": "tcp"
+    }
+  ],
+  "environment_variables": [
+    {
+      "name": "NODE_ENV",
+      "value": "production"
+    },
+    {
+      "name": "PORT",
+      "value": "3000"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "value": "INFO"
+    }
+  ],
+  "volume_mounts": [
+    {
+      "container_path": "/var/run/docker.sock",
+      "host_path": "/var/run/docker.sock",
+      "access": "ro"
+    },
+    {
+      "container_path": "/host/proc",
+      "host_path": "/proc",
+      "access": "ro"
+    },
+    {
+      "container_path": "/host/sys",
+      "host_path": "/sys",
+      "access": "ro"
+    },
+    {
+      "container_path": "/app/data",
+      "host_path": "/DATA/AppData/port-monitor/data",
+      "access": "rw"
+    }
+  ],
+  "devices": [],
+  "privileged": true,
+  "cpu_shares": "normal",
+  "memory_limit": "",
+  "restart_policy": "unless-stopped",
+  "container_labels": [
+    {
+      "key": "app.name",
+      "value": "Port Monitor"
+    },
+    {
+      "key": "app.version",
+      "value": "1.0.0"
+    },
+    {
+      "key": "app.description",
+      "value": "Advanced Port Monitoring for ZimaOS"
+    },
+    {
+      "key": "zimaos.enable",
+      "value": "true"
+    }
+  ],
+  "installation_notes": "Requires privileged access for complete network monitoring. Default login: admin/zimaos2024",
+  "version": "1.0.0",
+  "category": "network",
+  "author": "chicohaager",
+  "repository": "https://github.com/chicohaager/port-monitor",
+  "docker_hub": "https://hub.docker.com/r/chicohaager/zimaos-port-monitor"
+}
