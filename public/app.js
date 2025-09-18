@@ -12,13 +12,11 @@ class PortMonitorApp {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 10;
         this.currentTheme = this.loadTheme();
-        this.user = null;
 
         this.init();
     }
 
     async init() {
-        await this.checkAuthentication();
         this.setupWebSocket();
         this.setupEventListeners();
         this.setupCharts();
@@ -29,54 +27,8 @@ class PortMonitorApp {
         }
     }
 
-    async checkAuthentication() {
-        try {
-            const response = await fetch('/api/auth/check', {
-                credentials: 'include'
-            });
 
-            const data = await response.json();
 
-            if (data.success && data.authenticated) {
-                this.user = data.user;
-                this.updateUserInfo();
-            } else {
-                window.location.href = '/login.html';
-                return;
-            }
-        } catch (error) {
-            console.error('Authentication check failed:', error);
-            window.location.href = '/login.html';
-        }
-    }
-
-    updateUserInfo() {
-        const usernameEl = document.getElementById('username');
-        if (usernameEl && this.user) {
-            usernameEl.textContent = this.user.username;
-        }
-    }
-
-    async logout() {
-        try {
-            const response = await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                this.showNotification('Erfolgreich abgemeldet', 'success');
-                setTimeout(() => {
-                    window.location.href = '/login.html';
-                }, 1000);
-            } else {
-                this.showNotification('Logout error', 'error');
-            }
-        } catch (error) {
-            console.error('Logout failed:', error);
-            this.showNotification('Connection error during logout', 'error');
-        }
-    }
 
     sanitizeHTML(str) {
         const div = document.createElement('div');
@@ -205,9 +157,6 @@ class PortMonitorApp {
                 this.toggleTheme();
             }
 
-            if (e.target.closest('#logoutBtn')) {
-                this.logout();
-            }
 
             if (e.target.closest('.modal-close')) {
                 this.closeSettings();
@@ -606,9 +555,7 @@ class PortMonitorApp {
 
     async loadGeographicData() {
         try {
-            const response = await fetch('/api/security/geo-stats', {
-                credentials: 'include'
-            });
+            const response = await fetch('/api/security/geo-stats');
             if (response.ok) {
                 const result = await response.json();
                 this.renderGeographicVisualization(result.data);

@@ -18,7 +18,6 @@ const {
     requestId,
     errorHandler
 } = require('./middleware/security');
-const { authMiddleware, requireAuth, requireWebAuth } = require('./middleware/auth');
 
 const app = express();
 const server = http.createServer(app);
@@ -44,22 +43,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(sanitizeMiddleware);
 
-// Authentication routes (public)
-app.post('/api/auth/login', (req, res) => authMiddleware.handleLogin(req, res));
-app.post('/api/auth/logout', (req, res) => authMiddleware.handleLogout(req, res));
-app.get('/api/auth/check', (req, res) => authMiddleware.handleSessionCheck(req, res));
 
-// Login page route - publicly accessible
-app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/login.html'));
-});
 
-// Protect main routes BEFORE static files
-app.get('/', requireWebAuth, (req, res) => {
+// Serve main routes
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-app.get('/index.html', requireWebAuth, (req, res) => {
+app.get('/index.html', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
@@ -76,16 +67,6 @@ app.use(express.static(path.join(__dirname, '../public'), {
 // Apply rate limiting to API routes
 app.use('/api', apiLimiter);
 
-// Protect all API routes (except auth routes)
-app.use('/api', (req, res, next) => {
-    // Skip auth routes
-    if (req.path.startsWith('/auth/')) {
-        return next();
-    }
-
-    // Apply authentication to all other API routes
-    requireAuth(req, res, next);
-});
 
 // Initialize services
 const portMonitor = new PortMonitor();
@@ -497,7 +478,7 @@ app.get('/api/docker/containers/:id/stats', async (req, res, next) => {
 });
 
 // Geographic statistics endpoint
-app.get('/api/security/geo-stats', requireAuth, async (req, res, next) => {
+app.get('/api/security/geo-stats', async (req, res, next) => {
     try {
         const geoStats = await securityAnalyzer.getGeoStats();
         res.json({ success: true, data: geoStats });
