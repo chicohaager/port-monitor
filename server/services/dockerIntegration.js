@@ -2,10 +2,47 @@ const Docker = require('dockerode');
 
 class DockerIntegration {
     constructor() {
-        this.docker = new Docker({ socketPath: '/var/run/docker.sock' });
+        this.dockerAvailable = false;
+        this.initDocker();
+    }
+
+    async initDocker() {
+        try {
+            // Try different socket paths for different environments
+            const socketPaths = [
+                '/var/run/docker.sock',
+                '/host/var/run/docker.sock',
+                process.env.DOCKER_SOCKET || '/var/run/docker.sock'
+            ];
+
+            for (const socketPath of socketPaths) {
+                try {
+                    this.docker = new Docker({ socketPath });
+                    // Test connection
+                    await this.docker.ping();
+                    this.dockerAvailable = true;
+                    console.log(`Docker connected via: ${socketPath}`);
+                    break;
+                } catch (err) {
+                    console.log(`Failed to connect to Docker via ${socketPath}: ${err.message}`);
+                }
+            }
+
+            if (!this.dockerAvailable) {
+                console.warn('Docker integration disabled: No accessible Docker socket found');
+                console.warn('Make sure Docker socket is mounted and container has proper permissions');
+            }
+        } catch (error) {
+            console.error('Docker initialization error:', error.message);
+            this.dockerAvailable = false;
+        }
     }
 
     async getContainerPorts() {
+        if (!this.dockerAvailable) {
+            return [];
+        }
+
         try {
             const containers = await this.docker.listContainers();
             const containerPorts = [];
@@ -44,6 +81,10 @@ class DockerIntegration {
     }
 
     async getContainerLogs(containerId, lines = 100) {
+        if (!this.dockerAvailable) {
+            throw new Error('Docker not available');
+        }
+
         try {
             const container = this.docker.getContainer(containerId);
             const stream = await container.logs({
@@ -61,6 +102,10 @@ class DockerIntegration {
     }
 
     async getContainerStats(containerId) {
+        if (!this.dockerAvailable) {
+            return null;
+        }
+
         try {
             const container = this.docker.getContainer(containerId);
             const statsStream = await container.stats({ stream: false });
@@ -115,6 +160,10 @@ class DockerIntegration {
     }
 
     async restartContainer(containerId) {
+        if (!this.dockerAvailable) {
+            throw new Error('Docker not available');
+        }
+
         try {
             const container = this.docker.getContainer(containerId);
             await container.restart();
@@ -126,6 +175,10 @@ class DockerIntegration {
     }
 
     async stopContainer(containerId) {
+        if (!this.dockerAvailable) {
+            throw new Error('Docker not available');
+        }
+
         try {
             const container = this.docker.getContainer(containerId);
             await container.stop();
@@ -137,6 +190,10 @@ class DockerIntegration {
     }
 
     async startContainer(containerId) {
+        if (!this.dockerAvailable) {
+            throw new Error('Docker not available');
+        }
+
         try {
             const container = this.docker.getContainer(containerId);
             await container.start();
@@ -148,6 +205,10 @@ class DockerIntegration {
     }
 
     async getAllContainers() {
+        if (!this.dockerAvailable) {
+            return [];
+        }
+
         try {
             const containers = await this.docker.listContainers({ all: true });
             const detailedContainers = [];

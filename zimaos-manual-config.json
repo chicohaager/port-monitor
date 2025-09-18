@@ -32,7 +32,7 @@
     {
       "container_path": "/var/run/docker.sock",
       "host_path": "/var/run/docker.sock",
-      "access": "ro"
+      "access": "rw"
     },
     {
       "container_path": "/host/proc",
@@ -52,6 +52,7 @@
   ],
   "devices": [],
   "privileged": true,
+  "user": "root",
   "cpu_shares": "normal",
   "memory_limit": "",
   "restart_policy": "unless-stopped",
