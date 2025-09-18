@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  port-monitor:
+    build: .
+    container_name: zimaos-port-monitor
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    privileged: true
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - ./data:/app/data
+    ports:
+      - "3000:3000"
+    labels:
+      - "app.name=Port Monitor"
+      - "app.version=1.0.0"
+      - "app.description=Advanced Port Monitoring for ZimaOS"

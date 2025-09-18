@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZimaOS Port Monitor - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid #c33;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #383;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid #383;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .login-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .login-info h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .credentials {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <i class="fas fa-shield-alt"></i>
+            <h1>ZimaOS Port Monitor</h1>
+            <p>Secure access to port monitoring</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" class="form-input" id="username" placeholder="Username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-input" id="password" placeholder="Password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="login-button" id="loginButton">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </form>
+
+        <div class="login-info">
+            <h4><i class="fas fa-info-circle"></i> Default Login Credentials:</h4>
+            <p>Username: <span class="credentials">admin</span></p>
+            <p>Password: <span class="credentials">zimaos2024</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Global redirect function
+        window.redirectToApp = function() {
+            console.log('Manual redirect button clicked');
+            try {
+                window.location.href = '/';
+            } catch (e) {
+                console.error('Manual redirect failed:', e);
+                // Try alternative methods
+                try {
+                    window.location.replace('/');
+                } catch (e2) {
+                    console.error('Alternative redirect failed:', e2);
+                    try {
+                        window.open('/', '_self');
+                    } catch (e3) {
+                        console.error('All redirect methods failed:', e3);
+                    }
+                }
+            }
+        };
+
+        class LoginManager {
+            constructor() {
+                this.form = document.getElementById('loginForm');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.successMessage = document.getElementById('successMessage');
+                this.loginButton = document.getElementById('loginButton');
+
+                this.setupEventListeners();
+                this.checkExistingSession();
+            }
+
+            setupEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleLogin(e));
+            }
+
+            async checkExistingSession() {
+                try {
+                    console.log('Checking existing session...');
+                    const response = await fetch('/api/auth/check', {
+                        credentials: 'include'
+                    });
+
+                    console.log('Session check response status:', response.status);
+                    const data = await response.json();
+                    console.log('Session check response data:', data);
+
+                    if (response.ok && data.authenticated) {
+                        console.log('User is authenticated, attempting redirect...');
+                        this.showSuccess('Already logged in, redirecting...');
+                    } else {
+                        console.log('User not authenticated, staying on login page');
+                    }
+                } catch (error) {
+                    console.log('Session check failed:', error);
+                }
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    this.showError('Please fill in all fields.');
+                    return;
+                }
+
+                this.setLoading(true);
+                this.hideMessages();
+
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        console.log('Login successful:', data);
+                        this.showSuccess('Login successful! Redirecting...');
+                    } else {
+                        this.showError(data.error || 'Login failed');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showError('Connection error. Please try again.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                this.successMessage.style.display = 'none';
+            }
+
+            showSuccess(message) {
+                this.successMessage.innerHTML = `
+                    <div>${message}</div>
+                    <div style="margin-top: 1rem;">
+                        <button onclick="window.redirectToApp()"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                       color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
+                                       font-size: 1rem; cursor: pointer; width: 100%;">
+                            <i class="fas fa-arrow-right"></i> Continue to Port Monitor
+                        </button>
+                    </div>
+                `;
+                this.successMessage.style.display = 'block';
+                this.errorMessage.style.display = 'none';
+
+                // Add immediate redirect attempt
+                this.attemptRedirect();
+            }
+
+            attemptRedirect() {
+                console.log('Attempting redirect...');
+
+                // Try multiple redirect methods in sequence
+                setTimeout(() => {
+                    try {
+                        console.log('Method 1: window.location.href');
+                        window.location.href = '/';
+                    } catch (e) {
+                        console.error('Method 1 failed:', e);
+                        this.tryMethod2();
+                    }
+                }, 1000);
+            }
+
+            tryMethod2() {
+                setTimeout(() => {
+                    try {
+                        console.log('Method 2: window.location.replace');
+                        window.location.replace('/');
+                    } catch (e) {
+                        console.error('Method 2 failed:', e);
+                        this.tryMethod3();
+                    }
+                }, 1000);
+            }
+
+            tryMethod3() {
+                setTimeout(() => {
+                    try {
+                        console.log('Method 3: window.location.assign');
+                        window.location.assign('/');
+                    } catch (e) {
+                        console.error('Method 3 failed:', e);
+                        this.addWorkingRedirectButton();
+                    }
+                }, 1000);
+            }
+
+            addWorkingRedirectButton() {
+                console.log('All automatic redirects failed, showing manual button');
+                this.successMessage.innerHTML = `
+                    <div>Automatic redirect failed. Click the button below:</div>
+                    <div style="margin-top: 1rem;">
+                        <button onclick="window.open('/', '_self')"
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                       color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
+                                       font-size: 1rem; cursor: pointer; width: 100%;">
+                            <i class="fas fa-arrow-right"></i> Go to Port Monitor
+                        </button>
+                    </div>
+                `;
+            }
+
+            addManualRedirectButton() {
+                console.log('Adding manual redirect button...');
+
+                // Clear existing content and add button
+                this.successMessage.innerHTML = `
+                    <p>Automatic redirect failed. Click below to continue:</p>
+                    <button onclick="window.open('/', '_self')"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                   color: white; padding: 1rem; border: none; border-radius: 8px;
+                                   font-size: 1rem; cursor: pointer; margin-top: 1rem; width: 100%;">
+                        Continue to Port Monitor
+                    </button>
+                `;
+
+                // Also try window.open as fallback
+                setTimeout(() => {
+                    console.log('Attempting window.open fallback...');
+                    try {
+                        window.open('/', '_self');
+                    } catch (err) {
+                        console.error('Window.open also failed:', err);
+                    }
+                }, 2000);
+            }
+
+            hideMessages() {
+                this.errorMessage.style.display = 'none';
+                this.successMessage.style.display = 'none';
+            }
+
+            setLoading(loading) {
+                this.loginButton.disabled = loading;
+                if (loading) {
+                    this.loginButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                } else {
+                    this.loginButton.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+                }
+            }
+        }
+
+        // Initialize login manager
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "name": "Port Monitor",
+  "version": "1.0.0",
+  "description": "Advanced Port Monitoring and Security Analysis for ZimaOS",
+  "author": "ZimaOS Community",
+  "category": "Network & Security",
+  "icon": "/app-icon.png",
+  "screenshots": [
+    "/screenshots/dashboard.png",
+    "/screenshots/security.png",
+    "/screenshots/topology.png"
+  ],
+  "docker": {
+    "image": "zimaos-port-monitor:latest",
+    "tag": "latest",
+    "ports": {
+      "3000": {
+        "protocol": "tcp",
+        "description": "Web UI"
+      }
+    },
+    "volumes": [
+      {
+        "host": "/var/run/docker.sock",
+        "container": "/var/run/docker.sock",
+        "readonly": true
+      },
+      {
+        "host": "/proc",
+        "container": "/host/proc",
+        "readonly": true
+      },
+      {
+        "host": "/sys",
+        "container": "/host/sys",
+        "readonly": true
+      },
+      {
+        "host": "./data",
+        "container": "/app/data",
+        "readonly": false
+      }
+    ],
+    "environment": {
+      "NODE_ENV": "production",
+      "PORT": "3000"
+    },
+    "network_mode": "host",
+    "privileged": true,
+    "restart_policy": "unless-stopped"
+  },
+  "ui": {
+    "web_ui": "http://localhost:3000",
+    "admin_ui": "http://localhost:3000/admin"
+  },
+  "requirements": {
+    "min_memory": "256MB",
+    "recommended_memory": "512MB",
+    "min_disk": "100MB",
+    "zimaos_version": ">=1.0.0"
+  },
+  "features": [
+    "Real-time port monitoring",
+    "Security alert system",
+    "Docker container integration",
+    "Network topology visualization",
+    "Traffic monitoring",
+    "Whitelist management",
+    "Historical data tracking"
+  ],
+  "permissions": [
+    "docker_access",
+    "network_monitoring",
+    "system_information"
+  ],
+  "update_url": "https://github.com/zimaos/port-monitor/releases",
+  "support_url": "https://github.com/zimaos/port-monitor/issues",
+  "documentation_url": "https://github.com/zimaos/port-monitor/wiki"
+}
